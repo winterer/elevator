@@ -31,12 +31,12 @@ class RMIControllerTest {
 
     @Test
     void testSetup() throws Exception {
-        // rmiController.setup(null);
+        rmiController.setup(null);
 
-        IElevator elevator1 = (IElevator) Naming.lookup("rmi://localhost:1095/ElevatorSim");
+        IElevator elevator1 = (IElevator) Naming.lookup("rmi://localhost:1099/ElevatorSim");
         assertNotNull(elevator1);
 
-        Registry registry = LocateRegistry.getRegistry(1095);
+        Registry registry = LocateRegistry.getRegistry(1099);
         IElevator elevator = (IElevator) registry.lookup("ElevatorSim");
 
         assertNotNull(elevator);
