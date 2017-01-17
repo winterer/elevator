@@ -10,24 +10,43 @@
 
     <includeBaseDirectory>true</includeBaseDirectory>
 
-    <dependencySets>
-        <dependencySet>
-            <excludes>
-                <exclude>${project.groupId}:rmi-controller:*</exclude>
-            </excludes>
+    <fileSets>
+        <fileSet>
+            <directory>${project.basedir}</directory>
+            <outputDirectory>.</outputDirectory>
+            <includes>
+                <include>README*</include>
+                <include>LICENSE*</include>
+                <include>NOTICE*</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/src/main/bin</directory>
+            <outputDirectory>bin</outputDirectory>
+            <includes>
+                <include>*</include>
+            </includes>
+        </fileSet>
+    </fileSets>
 
-            <outputDirectory>/</outputDirectory>
-            <useProjectArtifact>false</useProjectArtifact>
-            <unpack>false</unpack>
-            <scope>runtime</scope>
-        </dependencySet>
+    <dependencySets>
         <dependencySet>
             <includes>
                 <include>${project.groupId}:rmi-controller:*</include>
             </includes>
 
-            <outputDirectory>/controllers</outputDirectory>
-            <useProjectArtifact>true</useProjectArtifact>
+            <outputDirectory>controllers</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <scope>runtime</scope>
+        </dependencySet>
+        <dependencySet>
+            <excludes>
+                <exclude>${project.groupId}:rmi-controller:*</exclude>
+            </excludes>
+
+            <outputDirectory>lib</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
             <scope>runtime</scope>
         </dependencySet>
