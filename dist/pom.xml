@@ -5,7 +5,7 @@
     <parent>
         <artifactId>ElevatorSim</artifactId>
         <groupId>elevator</groupId>
-        <version>0.9-SNAPSHOT</version>
+        <version>0.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -16,12 +16,12 @@
         <dependency>
             <groupId>elevator</groupId>
             <artifactId>simulator</artifactId>
-            <version>0.9-SNAPSHOT</version>
+            <version>0.1</version>
         </dependency>
         <dependency>
             <groupId>elevator</groupId>
             <artifactId>rmi-controller</artifactId>
-            <version>0.9-SNAPSHOT</version>
+            <version>0.1</version>
         </dependency>
     </dependencies>
 
