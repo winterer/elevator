@@ -5,7 +5,7 @@
     <groupId>elevator</groupId>
     <artifactId>ElevatorSim</artifactId>
     <packaging>pom</packaging>
-    <version>0.1.1-SNAPSHOT</version>
+    <version>0.1.1</version>
 	
     <modules>
         <module>controller-api</module>
@@ -84,7 +84,8 @@
 		<url>https://github.com/winterer/elevator</url>
 		<connection>scm:git:git://github.com/winterer/elevator.git</connection>
 		<developerConnection>scm:git:git@github.com:winterer/elevator.git</developerConnection>
-	</scm>
+	  <tag>ElevatorSim-0.1.1</tag>
+  </scm>
 	
 	<developers>
 		<developer>

@@ -8,19 +8,19 @@
 	<parent>
         <artifactId>ElevatorSim</artifactId>
         <groupId>elevator</groupId>
-        <version>0.1.1-SNAPSHOT</version>
+        <version>0.1.1</version>
     </parent>
 
     <dependencies>
         <dependency>
             <groupId>elevator</groupId>
             <artifactId>simulator</artifactId>
-            <version>0.1.1-SNAPSHOT</version>
+            <version>0.1.1</version>
         </dependency>
         <dependency>
             <groupId>elevator</groupId>
             <artifactId>rmi-controller</artifactId>
-            <version>0.1.1-SNAPSHOT</version>
+            <version>0.1.1</version>
         </dependency>
     </dependencies>
 
