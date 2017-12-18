@@ -1,9 +1,11 @@
 language: java
 deploy:
   provider: releases
-  api_key: "GITHUB OAUTH TOKEN"
+  api_key:
+    secure: Qi9gcumjG6gZTGSIR9P+YnWwGZGL0GsG3otoEXEFft2ZuNK9qC667reLQZ+oye5bF9KL9EHgdQMqWzztlH2r2qusHN/pDKvinKbz3gTL8jOkwI+a4JRkd+eQqChlVO5rM2kIeJOPNEakOLjFNV1SJYOp4un4ZMTANfzrHh2vPsXYYBQfIlPLJ/g3dO93M4BOcCeVSHe1t+YEXImfPMDuTSEnTboouRyntbFhiF3/hOaU2O46RHI17iMsfCYo5ot3SmHgiRfuimElnZdOGnFIWc9nLk9Ml2kSwsQMDoW9f/w0qzKHKD8mjiEPU4Gfnso0LZDGib5EKSexPAu6+JTb/Qog1G9XH9M84KovXk4BdfneebGLsyWRGa2bq/XctVUcmLo64IVaKvC2ZXBHiIMNYhc1yjjn2VWVLStbk0BBLPQrd45o4swnnvVdT7LONTet6pBhaeYDuOFQIvhSEFIGsyIxS4HU07VFl3/wqCZVxAQgliBRkenC7YT54UHNEBEGj3vtEA6g1PIbcxLQtKziJV/qZB4FjQFBtBi1SlNym4dZwGPgkeReh0AtjjvuFjS07MknzzAtv48IMczsalD8sXBIiR4SLg/ciRG2UStJic2cBIHjQ5wO92tWHzDEPvyKW5oHFf2tzalxfIRddxsQE3CgYRDbAZvM2rrgCOJ+p+k=
   file_glob: true
   file: dist/target/*.zip
   skip_cleanup: true
   on:
     tags: true
+    repo: winterer/elevator
