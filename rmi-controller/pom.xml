@@ -7,14 +7,14 @@
 	<parent>
         <artifactId>ElevatorSim</artifactId>
         <groupId>elevator</groupId>
-        <version>0.1.2-SNAPSHOT</version>
+        <version>0.1.2</version>
     </parent>
 
     <dependencies>
         <dependency>
             <groupId>elevator</groupId>
             <artifactId>controller-api</artifactId>
-            <version>0.1.2-SNAPSHOT</version>
+            <version>0.1.2</version>
         </dependency>
     </dependencies>
 </project>
