@@ -8,7 +8,7 @@ to enable remote access to the elevator system of the simulator via [remote meth
 When the controller is started by the elevator simulator, it automatically starts a local RMI registry,
 which listens on port `1099`, and binds the remote interface to the name `ElevatorSim`.
 
-To change this default behaviour, see section [Change RMI configuration](#markdown-header-change-rmi-configuration) below!
+To change this default behaviour, see section [Change RMI configuration](#change-rmi-configuration) below!
 
 ## Lookup of the remote interface ##
 
