@@ -17,3 +17,5 @@ jobs:
       run: mvn -B install --file pom.xml
     - name: Analyze with SonarCloud
       run: mvn sonar:sonar
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
