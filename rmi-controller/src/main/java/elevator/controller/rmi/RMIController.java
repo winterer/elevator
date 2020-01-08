@@ -1,17 +1,17 @@
 package elevator.controller.rmi;
 
-import elevator.IController;
-import elevator.IElevators;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import sqelevator.IElevator;
-
-import java.rmi.ConnectException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import elevator.IController;
+import elevator.IElevators;
+import sqelevator.IElevator;
 
 /**
  * Created by winterer on 13.01.2017.
@@ -31,8 +31,6 @@ public class RMIController implements IController {
     public void setup(IElevators elevators) {
         logger.info("Setting up controller");
 
-        //String codebase = IElevator.class.getClassLoader().getResource("").toExternalForm();
-        //System.setProperty("java.rmi.server.codebase", codebase);
         int port = Integer.getInteger(RMI_PORT_PROPERTY, Registry.REGISTRY_PORT);
 
         name = System.getProperty(RMI_NAME_PROPERTY, RMI_NAME_DEFAULT);
@@ -40,7 +38,7 @@ public class RMIController implements IController {
             rmiElevator = new RMIElevator(elevators);
 
             logger.info("Exporting IElevator");
-            IElevator stub = stub = (IElevator) UnicastRemoteObject.exportObject(rmiElevator, 0);
+            IElevator stub = (IElevator) UnicastRemoteObject.exportObject(rmiElevator, 0);
 
             logger.info("Starting RMI registry at port {}", port);
             registry = LocateRegistry.createRegistry(port);
@@ -48,7 +46,7 @@ public class RMIController implements IController {
             logger.info("Binding IElevator to name {}", name);
             registry.rebind(name, stub);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            logger.error("Error connecting to RMI server", e);
         }
     }
 
@@ -65,10 +63,8 @@ public class RMIController implements IController {
                 logger.info("Shutting down RMI registry");
                 UnicastRemoteObject.unexportObject(registry, true);
                 registry = null;
-            } catch (RemoteException e) {
-                throw new RuntimeException(e);
-            } catch (NotBoundException e) {
-                throw new RuntimeException(e);
+            } catch (RemoteException | NotBoundException e) {
+                logger.error("Error shutting down RMI connection", e);
             }
         }
     }
