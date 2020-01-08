@@ -20,7 +20,6 @@
 
         <sonar.organization>winterer</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <sonar.login>092611e7da4cb65254f2dbe6f47a65adb5682669</sonar.login>
     </properties>
 
     <dependencies>
