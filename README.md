@@ -1,6 +1,6 @@
 # README #
 
-[![Sonarcloud Status](https://sonarcloud.io/api/project_badges/measure?project=elevator:ElevatorSim&metric=alert_status)]
+![Sonarcloud Status](https://sonarcloud.io/api/project_badges/measure?project=elevator:ElevatorSim&metric=alert_status)
 (https://sonarcloud.io/dashboard/index/elevator:ElevatorSim)
 
 This README would normally document whatever steps are necessary to get your application up and running.
