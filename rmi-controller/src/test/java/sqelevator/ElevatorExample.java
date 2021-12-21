@@ -1,8 +1,6 @@
 package sqelevator;
 
-import java.net.MalformedURLException;
 import java.rmi.Naming;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
 /**
@@ -17,7 +15,7 @@ public class ElevatorExample {
     }
 
     public static void main(String[] args) throws Exception {
-        IElevator controller = (IElevator) Naming.lookup("rmi://localhost/ElevatorSim");
+        IElevator controller = (IElevator) Naming.lookup("rmi://host.docker.internal/ElevatorSim");
         ElevatorExample client = new ElevatorExample(controller);
         client.displayElevatorSettings();
         client.runExample();
@@ -79,6 +77,8 @@ public class ElevatorExample {
                 // no one's waiting => continue
                 continue;
             }
+            
+            System.out.println("Floor button pressed in floor #" + nextFloor);
 
             // Set the target floor to the next floor above
             controller.setTarget(elevator, nextFloor);

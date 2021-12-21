@@ -17,22 +17,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyVetoException;
 import java.text.NumberFormat;
-import java.util.ArrayList;
 
 class Simulator extends JInternalFrame implements InternalFrameListener, ActionListener, ChangeListener {
-    private static final int NEW = 0;
-    private static final int PLAY = 1;
-    private static final int PAUSE = 2;
-    private static final int STOP = 3;
-    private static final int DONE = 4;
-    private static final int RESTART = 5;
-    private static final int displayPeriod = 50;
-    private static final int simPeriod = 100;
-    private static final int resultsPeriod = 1000;
-    private int frameTime;
     private int status = 0;
     private int speed;
-    private Editor editor;
     private Model model;
     private Console console;
     private IController controller;
@@ -47,12 +35,9 @@ class Simulator extends JInternalFrame implements InternalFrameListener, ActionL
     private JLabel simClock2;
     private JLabel simClock3;
     private JPanel simPanel;
-    private JPanel passengerPanel;
     private JPanel statsPanel;
     private JPanel resultsPane;
     private JPanel summaryPane;
-    private ArrayList<Passenger> passengers = new ArrayList(10);
-    private long clock = 0L;
     private PassengerTableModel passengerTable;
     private NumberFormat nf;
     private JLabel passengerCountLabel;
@@ -85,12 +70,12 @@ class Simulator extends JInternalFrame implements InternalFrameListener, ActionL
 
     Simulator(Console console, Editor editor, IController controller) {
         this.console = console;
-        this.editor = editor;
         this.model = new Model();
         this.model.cloneModel(editor.getModel());
         this.controller = controller;
         this.engine = new Engine(this.model, this.controller);
-        this.setTitle("Simulation #" + ++simCount + ": \'" + this.model.getTitle() + "\'" + " using \'" + controller.getClass().getName() + "\'");
+        this.setTitle("Simulation #" + ++simCount + ": \'" + this.model.getTitle() + "\'" + " using \'"
+                + controller.getClass().getName() + "\'");
         ++simActive;
         this.setResizable(true);
         this.setIconifiable(true);
@@ -182,7 +167,7 @@ class Simulator extends JInternalFrame implements InternalFrameListener, ActionL
         this.add(simToolBar2, "Last");
         this.simPanel = new SimPanel();
         this.simPanel.setAutoscrolls(true);
-        this.simPanel.setLayout((LayoutManager)null);
+        this.simPanel.setLayout((LayoutManager) null);
         this.simPanel.setDoubleBuffered(true);
         JScrollPane simPane = new JScrollPane(this.simPanel);
         simulatorPane.addTab("Elevator", simPane);
@@ -237,7 +222,8 @@ class Simulator extends JInternalFrame implements InternalFrameListener, ActionL
         this.summaryPane.add(this.controllerTextLabel);
         this.summaryPane.add(this.controllerTextValue);
         SpringUtilities.makeCompactGrid(this.summaryPane, 3, 2, 6, 6, 6, 6);
-        this.summaryPane.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Summary"), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+        this.summaryPane.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Summary"),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)));
         this.summaryPane.setAlignmentX(0.0F);
         this.statsPanel.add(this.summaryPane);
         this.nf = NumberFormat.getNumberInstance();
@@ -253,7 +239,7 @@ class Simulator extends JInternalFrame implements InternalFrameListener, ActionL
         this.averageWaitValue.setHorizontalAlignment(11);
         this.setSize(this.averageWaitValue, this.x2Size, this.y2Size);
         this.maximumWaitLabel = new JLabel("Maximium wait time:");
-        this.maximumWaitValue = new JTextField(String.valueOf((double)this.engine.maxWait / 10.0D), 10);
+        this.maximumWaitValue = new JTextField(String.valueOf((double) this.engine.maxWait / 10.0D), 10);
         this.maximumWaitValue.setEditable(false);
         this.maximumWaitValue.setHorizontalAlignment(11);
         this.setSize(this.maximumWaitValue, this.x2Size, this.y2Size);
@@ -263,7 +249,7 @@ class Simulator extends JInternalFrame implements InternalFrameListener, ActionL
         this.averageTravelValue.setHorizontalAlignment(11);
         this.setSize(this.averageTravelValue, this.x2Size, this.y2Size);
         this.maximumTravelLabel = new JLabel("Maximum total time:");
-        this.maximumTravelValue = new JTextField(String.valueOf((double)this.engine.maxTravel / 10.0D), 10);
+        this.maximumTravelValue = new JTextField(String.valueOf((double) this.engine.maxTravel / 10.0D), 10);
         this.maximumTravelValue.setEditable(false);
         this.maximumTravelValue.setHorizontalAlignment(11);
         this.setSize(this.maximumTravelValue, this.x2Size, this.y2Size);
@@ -279,30 +265,31 @@ class Simulator extends JInternalFrame implements InternalFrameListener, ActionL
         this.resultsPane.add(this.maximumTravelLabel);
         this.resultsPane.add(this.maximumTravelValue);
         SpringUtilities.makeCompactGrid(this.resultsPane, 5, 2, 6, 6, 6, 6);
-        this.resultsPane.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Scenario"), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+        this.resultsPane.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Scenario"),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)));
         this.resultsPane.setAlignmentX(0.0F);
         this.statsPanel.add(this.resultsPane);
     }
 
     private void tickSim() {
-        if(this.status == 1 && this.engine.tickSim()) {
+        if (this.status == 1 && this.engine.tickSim()) {
             this.status = 4;
         }
 
     }
 
     private void tickDisplay() {
-        if(this.status == 1) {
+        if (this.status == 1) {
             this.passengerTable.fireTableDataChanged();
             this.updateClockLabels();
-        } else if(this.status == 5) {
+        } else if (this.status == 5) {
             this.engine.resetSim();
             this.status = 1;
-        } else if(this.status == 4) {
+        } else if (this.status == 4) {
             this.simPlay.setIcon(this.playButton);
             this.simPlay.setText("Play");
             this.simStop.setEnabled(false);
-            if(this.model.getPassengerNum() > 0) {
+            if (this.model.getPassengerNum() > 0) {
                 this.engine.clearPassengers();
             }
         }
@@ -320,19 +307,21 @@ class Simulator extends JInternalFrame implements InternalFrameListener, ActionL
     private void updateResults() {
         this.passengerCountValue.setText(String.valueOf(this.engine.passengersProcessed));
         this.averageWaitValue.setText(String.valueOf(this.nf.format(this.engine.averageWait / 10.0D)));
-        this.maximumWaitValue.setText(String.valueOf((double)this.engine.maxWait / 10.0D));
+        this.maximumWaitValue.setText(String.valueOf((double) this.engine.maxWait / 10.0D));
         this.averageTravelValue.setText(String.valueOf(this.nf.format(this.engine.averageTravel / 10.0D)));
-        this.maximumTravelValue.setText(String.valueOf((double)this.engine.maxTravel / 10.0D));
+        this.maximumTravelValue.setText(String.valueOf((double) this.engine.maxTravel / 10.0D));
     }
 
     boolean closeSim() {
-        boolean n = false;
         boolean bail = false;
-        if(this.status == 1) {
-            int n1 = JOptionPane.showConfirmDialog(this, "The Simulation \'" + this.getTitle() + "\' is currently running. Are you sure you would like to close it?\'", "Close Simulation?", 0);
-            if(n1 == 0) {
+        if (this.status == 1) {
+            int n1 = JOptionPane.showConfirmDialog(this,
+                    "The Simulation \'" + this.getTitle()
+                            + "\' is currently running. Are you sure you would like to close it?\'",
+                    "Close Simulation?", 0);
+            if (n1 == 0) {
                 bail = false;
-            } else if(n1 == 1) {
+            } else if (n1 == 1) {
                 bail = true;
             } else {
                 bail = true;
@@ -364,7 +353,7 @@ class Simulator extends JInternalFrame implements InternalFrameListener, ActionL
 
     public void internalFrameClosing(InternalFrameEvent arg0) {
         boolean bail = !this.closeSim();
-        if(!bail) {
+        if (!bail) {
             this.dispose();
             this.simTimer.stop();
             this.displayTimer.stop();
@@ -390,66 +379,64 @@ class Simulator extends JInternalFrame implements InternalFrameListener, ActionL
     }
 
     public void actionPerformed(ActionEvent e) {
-        boolean n = false;
         int n1;
-        if(e.getSource() == this.simPlay) {
-            if(this.status == 0) {
-                this.clock = 0L;
+        if (e.getSource() == this.simPlay) {
+            if (this.status == 0) {
                 this.simPlay.setIcon(this.pauseButton);
                 this.simPlay.setText("Pause");
                 this.simStop.setEnabled(true);
                 this.status = 1;
-            } else if(this.status == 2) {
+            } else if (this.status == 2) {
                 this.simPlay.setIcon(this.pauseButton);
                 this.simPlay.setText("Pause");
                 this.simStop.setEnabled(true);
                 this.status = 1;
-            } else if(this.status == 1) {
+            } else if (this.status == 1) {
                 this.simPlay.setIcon(this.resumeButton);
                 this.simPlay.setText("Resume");
                 this.simStop.setEnabled(true);
                 this.status = 2;
-            } else if(this.status == 4) {
-                n1 = JOptionPane.showConfirmDialog(this, "Do you want to restart the simulation?", "Restart Simulation?", 0);
-                if(n1 == 0) {
-                    this.clock = 0L;
+            } else if (this.status == 4) {
+                n1 = JOptionPane.showConfirmDialog(this, "Do you want to restart the simulation?",
+                        "Restart Simulation?", 0);
+                if (n1 == 0) {
                     this.simPlay.setIcon(this.pauseButton);
                     this.simPlay.setText("Pause");
                     this.simStop.setEnabled(true);
                     this.status = 5;
                 }
             }
-        } else if(e.getSource() == this.simStop) {
-            if(this.status == 2 || this.status == 1) {
+        } else if (e.getSource() == this.simStop) {
+            if (this.status == 2 || this.status == 1) {
                 n1 = JOptionPane.showConfirmDialog(this, "Do you want to stop the simulation?", "Stop Simulation?", 0);
-                if(n1 == 0) {
+                if (n1 == 0) {
                     this.simPlay.setIcon(this.playButton);
                     this.simPlay.setText("Play");
                     this.simStop.setEnabled(false);
                     this.status = 4;
                 }
             }
-        } else if(e.getSource() == this.simTimer) {
+        } else if (e.getSource() == this.simTimer) {
             this.tickSim();
-        } else if(e.getSource() == this.displayTimer) {
+        } else if (e.getSource() == this.displayTimer) {
             this.tickDisplay();
-        } else if(e.getSource() == this.resultsTimer) {
+        } else if (e.getSource() == this.resultsTimer) {
             this.updateResults();
         }
 
     }
 
     public void stateChanged(ChangeEvent e) {
-        if(e.getSource() == this.simSpeedSlider) {
+        if (e.getSource() == this.simSpeedSlider) {
             this.speed = this.simSpeedSlider.getValue();
             this.simTimer.setDelay(100 - this.speed);
-            if(this.speed == 100) {
+            if (this.speed == 100) {
                 this.displayTimer.setDelay(100);
             } else {
                 this.displayTimer.setDelay(50);
             }
 
-            if(Challenge.logging > 1) {
+            if (Challenge.logging > 1) {
                 System.out.println("Speed = " + this.speed);
             }
         }
@@ -461,7 +448,6 @@ class Simulator extends JInternalFrame implements InternalFrameListener, ActionL
         private int floors;
         private int height;
         private int elevators;
-        private int order;
         private int buildingX;
         private int buildingY;
         private int elevatorX;
@@ -471,8 +457,6 @@ class Simulator extends JInternalFrame implements InternalFrameListener, ActionL
         private int elevatorPosition;
         private int offsetX = 120;
         private int offsetY = 60;
-        private int buildingSizeX;
-        private int buildingSizeY;
         private int floorHeight = 16;
         private int shaftWidth = 40;
         private int frameWidth = 2;
@@ -497,45 +481,52 @@ class Simulator extends JInternalFrame implements InternalFrameListener, ActionL
             this.floors = Simulator.this.model.getBuildingFloors();
             this.height = Simulator.this.model.getBuildingFloorHeight();
             this.elevators = Simulator.this.model.getElevators();
-            this.order = Simulator.this.console.desktop.getComponentZOrder(Simulator.this.simPanel) + 1;
             this.buildingX = 2 * this.frameWidth + (this.elevators + 1) * this.shaftWidth;
             this.buildingY = 2 * this.frameWidth + this.floors * this.floorHeight;
-            this.heightScale = (double)(this.floors * this.height) / (double)(this.buildingY - 2 * this.frameWidth);
+            this.heightScale = (double) (this.floors * this.height) / (double) (this.buildingY - 2 * this.frameWidth);
             this.elevatorStoppedOpenImage = Console.createImageIcon("ElevatorStoppedOpen.jpg", "");
             this.elevatorX = this.elevatorStoppedOpenImage.getIconWidth();
             this.elevatorY = this.elevatorStoppedOpenImage.getIconHeight();
-            this.elevatorScale = Math.max((double)this.elevatorX / (double)this.shaftWidth, (double)this.elevatorY / (double)this.floorHeight);
-            this.elevatorWidth = Math.round((float)((double)this.elevatorX / this.elevatorScale));
-            this.elevatorHeight = Math.round((float)((double)this.elevatorY / this.elevatorScale));
-            this.elevatorStoppedOpenImage.setImage(this.elevatorStoppedOpenImage.getImage().getScaledInstance(this.elevatorWidth, this.elevatorHeight, 4));
+            this.elevatorScale = Math.max((double) this.elevatorX / (double) this.shaftWidth,
+                    (double) this.elevatorY / (double) this.floorHeight);
+            this.elevatorWidth = Math.round((float) ((double) this.elevatorX / this.elevatorScale));
+            this.elevatorHeight = Math.round((float) ((double) this.elevatorY / this.elevatorScale));
+            this.elevatorStoppedOpenImage.setImage(this.elevatorStoppedOpenImage.getImage()
+                    .getScaledInstance(this.elevatorWidth, this.elevatorHeight, 4));
             this.elevatorUpOpenImage = Console.createImageIcon("ElevatorGoingUpOpen.jpg", "");
-            this.elevatorUpOpenImage.setImage(this.elevatorUpOpenImage.getImage().getScaledInstance(this.elevatorWidth, this.elevatorHeight, 4));
+            this.elevatorUpOpenImage.setImage(
+                    this.elevatorUpOpenImage.getImage().getScaledInstance(this.elevatorWidth, this.elevatorHeight, 4));
             this.elevatorDownOpenImage = Console.createImageIcon("ElevatorGoingDownOpen.jpg", "");
-            this.elevatorDownOpenImage.setImage(this.elevatorDownOpenImage.getImage().getScaledInstance(this.elevatorWidth, this.elevatorHeight, 4));
+            this.elevatorDownOpenImage.setImage(this.elevatorDownOpenImage.getImage()
+                    .getScaledInstance(this.elevatorWidth, this.elevatorHeight, 4));
             this.elevatorAtPositionOpenImage = Console.createImageIcon("ElevatorAtPositionOpen.jpg", "");
-            this.elevatorAtPositionOpenImage.setImage(this.elevatorAtPositionOpenImage.getImage().getScaledInstance(this.elevatorWidth, this.elevatorHeight, 4));
+            this.elevatorAtPositionOpenImage.setImage(this.elevatorAtPositionOpenImage.getImage()
+                    .getScaledInstance(this.elevatorWidth, this.elevatorHeight, 4));
             this.elevatorStoppedClosedImage = Console.createImageIcon("ElevatorStoppedClosed.jpg", "");
-            this.elevatorStoppedClosedImage.setImage(this.elevatorStoppedClosedImage.getImage().getScaledInstance(this.elevatorWidth, this.elevatorHeight, 4));
+            this.elevatorStoppedClosedImage.setImage(this.elevatorStoppedClosedImage.getImage()
+                    .getScaledInstance(this.elevatorWidth, this.elevatorHeight, 4));
             this.elevatorUpClosedImage = Console.createImageIcon("ElevatorGoingUpClosed.jpg", "");
-            this.elevatorUpClosedImage.setImage(this.elevatorUpClosedImage.getImage().getScaledInstance(this.elevatorWidth, this.elevatorHeight, 4));
+            this.elevatorUpClosedImage.setImage(this.elevatorUpClosedImage.getImage()
+                    .getScaledInstance(this.elevatorWidth, this.elevatorHeight, 4));
             this.elevatorDownClosedImage = Console.createImageIcon("ElevatorGoingDownClosed.jpg", "");
-            this.elevatorDownClosedImage.setImage(this.elevatorDownClosedImage.getImage().getScaledInstance(this.elevatorWidth, this.elevatorHeight, 4));
+            this.elevatorDownClosedImage.setImage(this.elevatorDownClosedImage.getImage()
+                    .getScaledInstance(this.elevatorWidth, this.elevatorHeight, 4));
             this.elevatorAtPositionClosedImage = Console.createImageIcon("ElevatorAtPositionClosed.jpg", "");
-            this.elevatorAtPositionClosedImage.setImage(this.elevatorAtPositionClosedImage.getImage().getScaledInstance(this.elevatorWidth, this.elevatorHeight, 4));
+            this.elevatorAtPositionClosedImage.setImage(this.elevatorAtPositionClosedImage.getImage()
+                    .getScaledInstance(this.elevatorWidth, this.elevatorHeight, 4));
 
-            for(int i = 0; i < this.elevators; ++i) {
+            for (int i = 0; i < this.elevators; ++i) {
                 this.elevatorImage[i] = this.elevatorStoppedOpenImage;
             }
 
-            this.setMinimumSize(new Dimension(this.offsetX + this.buildingX + this.border, this.offsetY + this.buildingY + this.border));
-            this.setPreferredSize(new Dimension(this.offsetX + this.buildingX + this.border, this.offsetY + this.buildingY + this.border));
+            this.setMinimumSize(new Dimension(this.offsetX + this.buildingX + this.border,
+                    this.offsetY + this.buildingY + this.border));
+            this.setPreferredSize(new Dimension(this.offsetX + this.buildingX + this.border,
+                    this.offsetY + this.buildingY + this.border));
         }
 
         protected void paintComponent(Graphics g) {
-            boolean i = false;
-            boolean j = false;
-            boolean direction = false;
-            if(this.isOpaque()) {
+            if (this.isOpaque()) {
                 g.setColor(this.getBackground());
                 g.fillRect(0, 0, this.getWidth(), this.getHeight());
             }
@@ -548,28 +539,36 @@ class Simulator extends JInternalFrame implements InternalFrameListener, ActionL
             g.setColor(Color.DARK_GRAY);
 
             int var7;
-            for(var7 = 1; var7 < this.floors; ++var7) {
-                g.drawLine(this.offsetX + this.frameWidth, this.offsetY + this.buildingY - this.frameWidth - var7 * this.floorHeight, this.offsetX + this.buildingX - this.frameWidth, this.offsetY + this.buildingY - this.frameWidth - var7 * this.floorHeight);
+            for (var7 = 1; var7 < this.floors; ++var7) {
+                g.drawLine(this.offsetX + this.frameWidth,
+                        this.offsetY + this.buildingY - this.frameWidth - var7 * this.floorHeight,
+                        this.offsetX + this.buildingX - this.frameWidth,
+                        this.offsetY + this.buildingY - this.frameWidth - var7 * this.floorHeight);
             }
 
-            for(var7 = 1; var7 <= this.elevators; ++var7) {
-                g.drawLine(this.offsetX + this.frameWidth + var7 * this.shaftWidth, this.offsetY + this.frameWidth, this.offsetX + this.frameWidth + var7 * this.shaftWidth, this.offsetY + this.buildingY - this.frameWidth);
+            for (var7 = 1; var7 <= this.elevators; ++var7) {
+                g.drawLine(this.offsetX + this.frameWidth + var7 * this.shaftWidth, this.offsetY + this.frameWidth,
+                        this.offsetX + this.frameWidth + var7 * this.shaftWidth,
+                        this.offsetY + this.buildingY - this.frameWidth);
             }
 
             g.setColor(Color.GRAY);
 
-            for(var7 = 1; var7 <= this.elevators; ++var7) {
-                for(int var8 = 0; var8 < this.floors; ++var8) {
-                    if(Simulator.this.model.getServicesFloor(var7 - 1, var8)) {
-                        g.fillRect(this.offsetX + this.frameWidth + var7 * this.shaftWidth - 1, this.offsetY + this.buildingY - this.frameWidth - this.floorHeight / 2 - this.floorHeight * var8 - 1, 3, 3);
+            for (var7 = 1; var7 <= this.elevators; ++var7) {
+                for (int var8 = 0; var8 < this.floors; ++var8) {
+                    if (Simulator.this.model.getServicesFloor(var7 - 1, var8)) {
+                        g.fillRect(this.offsetX + this.frameWidth + var7 * this.shaftWidth - 1, this.offsetY
+                                + this.buildingY - this.frameWidth - this.floorHeight / 2 - this.floorHeight * var8 - 1,
+                                3, 3);
                     }
                 }
             }
 
             g.setColor(Color.LIGHT_GRAY);
 
-            for(var7 = 0; var7 < 3; ++var7) {
-                g.fillRect(this.shaftOffset, this.offsetY - (var7 + 1) * this.floorHeight, this.offsetX - this.shaftOffset + this.buildingX - this.frameWidth, this.floorHeight - 2);
+            for (var7 = 0; var7 < 3; ++var7) {
+                g.fillRect(this.shaftOffset, this.offsetY - (var7 + 1) * this.floorHeight,
+                        this.offsetX - this.shaftOffset + this.buildingX - this.frameWidth, this.floorHeight - 2);
             }
 
             g.setColor(Color.BLACK);
@@ -577,65 +576,76 @@ class Simulator extends JInternalFrame implements InternalFrameListener, ActionL
             g.drawString("Passengers:", this.shaftOffset + 10, this.offsetY - 2 * this.floorHeight + this.textOffset);
             g.drawString("Weight:", this.shaftOffset + 10, this.offsetY - 1 * this.floorHeight + this.textOffset);
 
-            for(var7 = 0; var7 < this.elevators; ++var7) {
-                g.drawString(String.valueOf(Simulator.this.model.getElevatorTarget(var7) + 1), this.offsetX + this.frameWidth + (var7 + 1) * this.shaftWidth - 5, this.offsetY - 3 * this.floorHeight + this.textOffset);
-                g.drawString(String.valueOf(Simulator.this.model.getElevatorPassengerCount(var7)), this.offsetX + this.frameWidth + (var7 + 1) * this.shaftWidth - 5, this.offsetY - 2 * this.floorHeight + this.textOffset);
-                g.drawString(String.valueOf(Simulator.this.model.getElevatorWeight(var7)), this.offsetX + this.frameWidth + (var7 + 1) * this.shaftWidth - 5, this.offsetY - 1 * this.floorHeight + this.textOffset);
+            for (var7 = 0; var7 < this.elevators; ++var7) {
+                g.drawString(String.valueOf(Simulator.this.model.getElevatorTarget(var7) + 1),
+                        this.offsetX + this.frameWidth + (var7 + 1) * this.shaftWidth - 5,
+                        this.offsetY - 3 * this.floorHeight + this.textOffset);
+                g.drawString(String.valueOf(Simulator.this.model.getElevatorPassengerCount(var7)),
+                        this.offsetX + this.frameWidth + (var7 + 1) * this.shaftWidth - 5,
+                        this.offsetY - 2 * this.floorHeight + this.textOffset);
+                g.drawString(String.valueOf(Simulator.this.model.getElevatorWeight(var7)),
+                        this.offsetX + this.frameWidth + (var7 + 1) * this.shaftWidth - 5,
+                        this.offsetY - 1 * this.floorHeight + this.textOffset);
             }
 
             g.setColor(Color.LIGHT_GRAY);
 
-            for(var7 = 0; var7 < this.floors; ++var7) {
-                g.fillRect(this.floorOffset, this.offsetY + this.buildingY - this.frameWidth - (var7 + 1) * this.floorHeight + 1, this.offsetX - this.floorOffset - this.frameWidth, this.floorHeight - 2);
+            for (var7 = 0; var7 < this.floors; ++var7) {
+                g.fillRect(this.floorOffset,
+                        this.offsetY + this.buildingY - this.frameWidth - (var7 + 1) * this.floorHeight + 1,
+                        this.offsetX - this.floorOffset - this.frameWidth, this.floorHeight - 2);
             }
 
             g.setColor(Color.BLACK);
-            boolean y = false;
             this.waitingPassengers = Simulator.this.model.getWaitingPassengers();
 
-            for(var7 = 0; var7 < this.floors; ++var7) {
-                int var10 = this.offsetY + this.buildingY - this.frameWidth - (var7 + 1) * this.floorHeight + this.textOffset;
+            for (var7 = 0; var7 < this.floors; ++var7) {
+                int var10 = this.offsetY + this.buildingY - this.frameWidth - (var7 + 1) * this.floorHeight
+                        + this.textOffset;
                 g.drawString("#" + String.valueOf(var7 + 1), this.floorOffset + 10, var10);
                 g.drawString("U:" + String.valueOf(this.waitingPassengers[var7][0]), this.floorOffset + 40, var10);
                 g.drawString("D:" + String.valueOf(this.waitingPassengers[var7][1]), this.floorOffset + 70, var10);
             }
 
-            for(var7 = 0; var7 < this.elevators; ++var7) {
+            for (var7 = 0; var7 < this.elevators; ++var7) {
                 int var9 = Simulator.this.model.getElevatorDirection(var7);
                 int doors = Simulator.this.model.getElevatorDoors(var7);
-                if(Simulator.this.model.getElevatorDirection(var7) == 0) {
-                    if(doors == 0) {
+                if (Simulator.this.model.getElevatorDirection(var7) == 0) {
+                    if (doors == 0) {
                         this.elevatorImage[var7] = this.elevatorUpOpenImage;
                     } else {
                         this.elevatorImage[var7] = this.elevatorUpClosedImage;
                     }
-                } else if(var9 == 1) {
-                    if(doors == 0) {
+                } else if (var9 == 1) {
+                    if (doors == 0) {
                         this.elevatorImage[var7] = this.elevatorDownOpenImage;
                     } else {
                         this.elevatorImage[var7] = this.elevatorDownClosedImage;
                     }
-                } else if(var9 == 2) {
-                    if(doors == 0) {
+                } else if (var9 == 2) {
+                    if (doors == 0) {
                         this.elevatorImage[var7] = this.elevatorStoppedOpenImage;
                     } else {
                         this.elevatorImage[var7] = this.elevatorStoppedClosedImage;
                     }
-                } else if(doors == 0) {
+                } else if (doors == 0) {
                     this.elevatorImage[var7] = this.elevatorAtPositionOpenImage;
                 } else {
                     this.elevatorImage[var7] = this.elevatorAtPositionClosedImage;
                 }
 
-                this.elevatorPosition = 1 + this.offsetY + this.buildingY - this.frameWidth - this.elevatorHeight - Math.round((float)((double)Simulator.this.model.getElevatorPosition(var7) / this.heightScale));
-                g.drawImage(this.elevatorImage[var7].getImage(), this.offsetX + this.frameWidth + (var7 + 1) * this.shaftWidth - this.elevatorWidth / 2, this.elevatorPosition, this.elevatorImage[var7].getImageObserver());
+                this.elevatorPosition = 1 + this.offsetY + this.buildingY - this.frameWidth - this.elevatorHeight - Math
+                        .round((float) ((double) Simulator.this.model.getElevatorPosition(var7) / this.heightScale));
+                g.drawImage(this.elevatorImage[var7].getImage(),
+                        this.offsetX + this.frameWidth + (var7 + 1) * this.shaftWidth - this.elevatorWidth / 2,
+                        this.elevatorPosition, this.elevatorImage[var7].getImageObserver());
             }
 
         }
     }
 
     class PassengerTableModel extends AbstractTableModel {
-        private String[] columnNames = new String[]{"ID", "Depart", "Target", "Waiting", "Riding", "On"};
+        private String[] columnNames = new String[] { "ID", "Depart", "Target", "Waiting", "Riding", "On" };
 
         PassengerTableModel() {
         }

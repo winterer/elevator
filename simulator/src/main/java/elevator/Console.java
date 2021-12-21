@@ -5,26 +5,45 @@
 
 package elevator;
 
-import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
-import org.reflections.util.ConfigurationBuilder;
-import org.reflections.util.FilterBuilder;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.beans.PropertyVetoException;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
+
+import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JDesktopPane;
+import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
+import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
+import org.reflections.util.ConfigurationBuilder;
 
 class Console implements ActionListener, ItemListener, WindowListener {
     JDesktopPane desktop;
@@ -42,24 +61,19 @@ class Console implements ActionListener, ItemListener, WindowListener {
     private String menuSaveAsEditor = "Save As";
     private String menuSimRun = "Run Simulation";
     private String menuCloseText = "Close";
-    private String menuCloseAllText = "Close All";
     private String menuExitText = "Exit";
-    private String menuControllerText = "Controller";
     private JMenuItem menuNew;
     private JMenuItem menuOpen;
     private JMenuItem menuSave;
     private JMenuItem menuSaveAs;
     private JMenuItem menuSim;
     private JMenuItem menuClose;
-    private JMenuItem menuCloseAll;
     private JMenuItem menuExit;
-    private JMenuItem menuController;
     private JRadioButtonMenuItem[] controlButton;
     private ButtonGroup controlGroup;
     private Class<?>[] controlClass = null;
     private int controlCount = 0;
     private String[] controlList = null;
-    private String[] controlText = null;
 
     Console() {
         try {
@@ -167,8 +181,6 @@ class Console implements ActionListener, ItemListener, WindowListener {
     }
 
     private boolean getControllers() {
-        List<ClassLoader> classLoaders = new ArrayList<>();
-
         ConfigurationBuilder builder = new ConfigurationBuilder();
         try {
             Path controllersDir = Paths.get(".", "controllers");
@@ -197,7 +209,6 @@ class Console implements ActionListener, ItemListener, WindowListener {
 
         this.controlClass = new Class[this.controlCount];
         this.controlList = new String[this.controlCount];
-        this.controlText = new String[this.controlCount];
 
         int i = 0;
         for (Class<? extends IController> controllerClass : controllerClasses) {
@@ -283,14 +294,13 @@ class Console implements ActionListener, ItemListener, WindowListener {
                         System.out.println("Controller not found!");
                     } else if (foundControl & !((Editor) frame).applyChangesSim()) {
                         try {
-                            controlObject = (IController) this.controlClass[i].newInstance();
-                        } catch (InstantiationException var6) {
-                            var6.printStackTrace();
-                        } catch (IllegalAccessException var7) {
-                            var7.printStackTrace();
+                            controlObject = (IController) this.controlClass[i].getDeclaredConstructor().newInstance();
+                            new Simulator(this, (Editor) frame, controlObject);
+                        } catch (InstantiationException | NoSuchMethodException | IllegalAccessException ex) {
+                            ex.printStackTrace();
+                        } catch (InvocationTargetException ite) {
+                            ite.getTargetException().printStackTrace();
                         }
-
-                        new Simulator(this, (Editor) frame, controlObject);
                     }
                     break;
                 }
@@ -334,8 +344,6 @@ class Console implements ActionListener, ItemListener, WindowListener {
         boolean bail = false;
         JInternalFrame frame = null;
         JInternalFrame startFrame = null;
-        boolean i = false;
-        boolean j = false;
         startFrame = this.desktop.getSelectedFrame();
         if (startFrame instanceof Editor & startFrame != null) {
             bail = !((Editor) startFrame).closeModel();

@@ -68,7 +68,7 @@ public class Model {
     String description = null;
     Interface controllerInterface;
     long clock = 0L;
-    ArrayList<Passenger> passengers = new ArrayList(10);
+    ArrayList<Passenger> passengers = new ArrayList<>(10);
     boolean splitsAllowed = true;
 
     public Model() {
@@ -256,8 +256,6 @@ public class Model {
     }
 
     int[][] getWaitingPassengers() {
-        boolean i = false;
-        boolean j = false;
         int[][] waiting = new int[99][2];
 
         int var5;

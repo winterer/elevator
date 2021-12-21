@@ -5,23 +5,56 @@
 
 package elevator;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
-import javax.swing.*;
-import javax.swing.event.*;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputMethodEvent;
 import java.beans.PropertyVetoException;
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JFileChooser;
+import javax.swing.JInternalFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.JToolBar;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.SpringLayout;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.InternalFrameEvent;
+import javax.swing.event.InternalFrameListener;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 class Editor extends JInternalFrame implements ActionListener, ChangeListener, DocumentListener, InternalFrameListener {
     private static final long serialVersionUID = 1L;
@@ -75,41 +108,18 @@ class Editor extends JInternalFrame implements ActionListener, ChangeListener, D
     private int x2Size = 50;
     private int y2Size = 22;
     private Document document;
-    private String saveFile = null;
-    private String saveAsFile = null;
-    private String tempFile = null;
-    private String docString;
-    private File directory = null;
     private File file = null;
     private JavaFileFilter fileFilter = new JavaFileFilter();
-    private Interface controllerInterface;
-    private static final String TAG_SCENARIO = "Scenario";
-    private static final String TAG_TITLE = "Title";
-    private static final String TAG_DESCRIPTION = "Description";
-    private static final String TAG_FLOORS = "Floors";
-    private static final String TAG_FLOOR_HEIGHT = "FloorHeight";
-    private static final String TAG_ELEVATORS = "Elevators";
-    private static final String TAG_ELEVATOR_SPEED = "ElevatorSpeed";
-    private static final String TAG_ELEVATOR_CAPACITY = "ElevatorCapacity";
-    private static final String TAG_ELEVATOR_ACCEL = "ElevatorAccel";
-    private static final String TAG_STAGES = "Stages";
-    private static final String TAG_REPEATS = "Repeats";
-    private static final String TAG_STAGE_TIME = "StageTime";
-    private static final String TAG_GROUND_ARRIVAL = "GroundArrival";
-    private static final String TAG_OTHER_ARRIVAL = "OtherArrival";
-    private static final String TAG_OTHER_EXIT = "OtherExit";
-    private static final String XML_VERSION = "1.0";
-    private static final String XML_ENCODING = "UTF-8";
 
     Editor(Console console, boolean open) {
         boolean success = true;
         this.console = console;
         this.model = new Model();
-        if(open) {
+        if (open) {
             success = this.openModel();
         }
 
-        if(!success) {
+        if (!success) {
             this.model = null;
         } else {
             this.setTitle("Scenario #" + ++editorCount);
@@ -214,7 +224,8 @@ class Editor extends JInternalFrame implements ActionListener, ChangeListener, D
         this.scenarioDescriptionPane.add(repeatSpinnerLabel);
         this.scenarioDescriptionPane.add(this.repeatSpinner);
         SpringUtilities.makeCompactGrid(this.scenarioDescriptionPane, 3, 2, 6, 6, 6, 6);
-        this.scenarioDescriptionPane.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Scenario"), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+        this.scenarioDescriptionPane.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createTitledBorder("Scenario"), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
         simulationPanel.add(this.scenarioDescriptionPane);
         this.scenarioDescriptionPane.setAlignmentX(0.0F);
         this.scenarioDescriptionPane.setVisible(true);
@@ -223,10 +234,11 @@ class Editor extends JInternalFrame implements ActionListener, ChangeListener, D
         JLabel[] stageOtherArrivalSpinnerLabel = new JLabel[10];
         JLabel[] stageOtherExitSpinnerLabel = new JLabel[10];
 
-        for(int i = 0; i < 3; ++i) {
+        for (int i = 0; i < 3; ++i) {
             this.scenarioStagePane[i] = new JPanel(new SpringLayout());
             this.stageTimeSpinnerModel[i] = new SpinnerNumberModel(this.model.getStageTime(i), 1, 10000, 1);
-            this.stageGroundArrivalSpinnerModel[i] = new SpinnerNumberModel(this.model.getGroundArrival(i), 0, 10000, 1);
+            this.stageGroundArrivalSpinnerModel[i] = new SpinnerNumberModel(this.model.getGroundArrival(i), 0, 10000,
+                    1);
             this.stageOtherArrivalSpinnerModel[i] = new SpinnerNumberModel(this.model.getOtherArrival(i), 0, 1000, 1);
             this.stageOtherExitSpinnerModel[i] = new SpinnerNumberModel(this.model.getOtherExit(i), 0, 100, 1);
             this.stageTimeSpinner[i] = new JSpinner(this.stageTimeSpinnerModel[i]);
@@ -258,10 +270,11 @@ class Editor extends JInternalFrame implements ActionListener, ChangeListener, D
             this.scenarioStagePane[i].add(stageOtherExitSpinnerLabel[i]);
             this.scenarioStagePane[i].add(this.stageOtherExitSpinner[i]);
             SpringUtilities.makeCompactGrid(this.scenarioStagePane[i], 4, 2, 6, 6, 6, 6);
-            this.scenarioStagePane[i].setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Stage " + (i + 1)), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+            this.scenarioStagePane[i].setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createTitledBorder("Stage " + (i + 1)), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
             simulationPanel.add(this.scenarioStagePane[i]);
             this.scenarioStagePane[i].setAlignmentX(0.0F);
-            if(i < this.model.getStageNum()) {
+            if (i < this.model.getStageNum()) {
                 this.scenarioStagePane[i].setVisible(true);
             } else {
                 this.scenarioStagePane[i].setVisible(false);
@@ -289,7 +302,8 @@ class Editor extends JInternalFrame implements ActionListener, ChangeListener, D
         this.buildingPane.add(floorHeightSpinnerLabel);
         this.buildingPane.add(this.floorHeightSpinner);
         SpringUtilities.makeCompactGrid(this.buildingPane, 2, 2, 6, 6, 6, 6);
-        this.buildingPane.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Floors"), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+        this.buildingPane.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Floors"),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)));
         buildingPanel.add(this.buildingPane);
         this.buildingPane.setAlignmentX(0.0F);
         this.buildingPane.setVisible(true);
@@ -330,7 +344,8 @@ class Editor extends JInternalFrame implements ActionListener, ChangeListener, D
         this.elevatorPane.add(elevatorAccelSpinnerLabel);
         this.elevatorPane.add(this.elevatorAccelSpinner);
         SpringUtilities.makeCompactGrid(this.elevatorPane, 4, 2, 6, 6, 6, 6);
-        this.elevatorPane.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Elevators"), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+        this.elevatorPane.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Elevators"),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)));
         elevatorPanel.add(this.elevatorPane);
         this.elevatorPane.setAlignmentX(0.0F);
         this.elevatorPane.setVisible(true);
@@ -345,7 +360,7 @@ class Editor extends JInternalFrame implements ActionListener, ChangeListener, D
 
     private void setDirty(boolean dirty) {
         this.isDirty = dirty;
-        if(this.isDirty) {
+        if (this.isDirty) {
             this.isSaved = false;
         }
 
@@ -354,11 +369,11 @@ class Editor extends JInternalFrame implements ActionListener, ChangeListener, D
     }
 
     public void actionPerformed(ActionEvent e) {
-        if(e.getSource() == this.editorApply) {
+        if (e.getSource() == this.editorApply) {
             this.applyChanges();
-        } else if(e.getSource() == this.editorRestore) {
+        } else if (e.getSource() == this.editorRestore) {
             this.restore();
-        } else if(e.getSource() == this.editorRun) {
+        } else if (e.getSource() == this.editorRun) {
             this.console.newSimRun();
         } else {
             this.setDirty(true);
@@ -367,11 +382,11 @@ class Editor extends JInternalFrame implements ActionListener, ChangeListener, D
     }
 
     public void stateChanged(ChangeEvent e) {
-        if(e.getSource().equals(this.stageSpinner)) {
-            SpinnerNumberModel model = (SpinnerNumberModel)this.stageSpinner.getModel();
+        if (e.getSource().equals(this.stageSpinner)) {
+            SpinnerNumberModel model = (SpinnerNumberModel) this.stageSpinner.getModel();
 
-            for(int i = 0; i < 3; ++i) {
-                if(i < model.getNumber().intValue()) {
+            for (int i = 0; i < 3; ++i) {
+                if (i < model.getNumber().intValue()) {
                     this.scenarioStagePane[i].setVisible(true);
                 } else {
                     this.scenarioStagePane[i].setVisible(false);
@@ -385,21 +400,24 @@ class Editor extends JInternalFrame implements ActionListener, ChangeListener, D
     private void applyChanges() {
         this.model.setTitle(this.simNameText.getText());
         this.model.setDescription(this.simDescriptionText.getText());
-        this.model.setBuildingFloorHeight(((SpinnerNumberModel)this.floorHeightSpinnerModel).getNumber().intValue());
-        this.model.setElevatorSpeed(((SpinnerNumberModel)this.elevatorSpeedSpinnerModel).getNumber().intValue());
-        this.model.setElevatorCapacity(((SpinnerNumberModel)this.elevatorCapacitySpinnerModel).getNumber().intValue());
-        this.model.setBuildingFloors(((SpinnerNumberModel)this.floorNumSpinnerModel).getNumber().intValue());
-        this.model.setElevators(((SpinnerNumberModel)this.elevatorNumSpinnerModel).getNumber().intValue());
-        this.model.setElevatorAccel(((SpinnerNumberModel)this.elevatorAccelSpinnerModel).getNumber().intValue());
-        this.model.setElevatorCapacity(((SpinnerNumberModel)this.elevatorCapacitySpinnerModel).getNumber().intValue());
-        this.model.setStageNum(((SpinnerNumberModel)this.stageSpinnerModel).getNumber().intValue());
-        this.model.setRepeat(((SpinnerNumberModel)this.repeatSpinnerModel).getNumber().intValue());
+        this.model.setBuildingFloorHeight(((SpinnerNumberModel) this.floorHeightSpinnerModel).getNumber().intValue());
+        this.model.setElevatorSpeed(((SpinnerNumberModel) this.elevatorSpeedSpinnerModel).getNumber().intValue());
+        this.model.setElevatorCapacity(((SpinnerNumberModel) this.elevatorCapacitySpinnerModel).getNumber().intValue());
+        this.model.setBuildingFloors(((SpinnerNumberModel) this.floorNumSpinnerModel).getNumber().intValue());
+        this.model.setElevators(((SpinnerNumberModel) this.elevatorNumSpinnerModel).getNumber().intValue());
+        this.model.setElevatorAccel(((SpinnerNumberModel) this.elevatorAccelSpinnerModel).getNumber().intValue());
+        this.model.setElevatorCapacity(((SpinnerNumberModel) this.elevatorCapacitySpinnerModel).getNumber().intValue());
+        this.model.setStageNum(((SpinnerNumberModel) this.stageSpinnerModel).getNumber().intValue());
+        this.model.setRepeat(((SpinnerNumberModel) this.repeatSpinnerModel).getNumber().intValue());
 
-        for(int i = 0; i < 3; ++i) {
-            this.model.setStageTime(i, ((SpinnerNumberModel)this.stageTimeSpinnerModel[i]).getNumber().intValue());
-            this.model.setGroundArrival(i, ((SpinnerNumberModel)this.stageGroundArrivalSpinnerModel[i]).getNumber().intValue());
-            this.model.setOtherArrival(i, ((SpinnerNumberModel)this.stageOtherArrivalSpinnerModel[i]).getNumber().intValue());
-            this.model.setOtherExit(i, ((SpinnerNumberModel)this.stageOtherExitSpinnerModel[i]).getNumber().intValue());
+        for (int i = 0; i < 3; ++i) {
+            this.model.setStageTime(i, ((SpinnerNumberModel) this.stageTimeSpinnerModel[i]).getNumber().intValue());
+            this.model.setGroundArrival(i,
+                    ((SpinnerNumberModel) this.stageGroundArrivalSpinnerModel[i]).getNumber().intValue());
+            this.model.setOtherArrival(i,
+                    ((SpinnerNumberModel) this.stageOtherArrivalSpinnerModel[i]).getNumber().intValue());
+            this.model.setOtherExit(i,
+                    ((SpinnerNumberModel) this.stageOtherExitSpinnerModel[i]).getNumber().intValue());
         }
 
         this.setDirty(false);
@@ -418,7 +436,7 @@ class Editor extends JInternalFrame implements ActionListener, ChangeListener, D
         this.stageSpinnerModel.setValue(Integer.valueOf(this.model.getStageNum()));
         this.repeatSpinnerModel.setValue(Integer.valueOf(this.model.getRepeat()));
 
-        for(int i = 0; i < 3; ++i) {
+        for (int i = 0; i < 3; ++i) {
             this.stageTimeSpinnerModel[i].setValue(Integer.valueOf(this.model.getStageTime(i)));
             this.stageGroundArrivalSpinnerModel[i].setValue(Integer.valueOf(this.model.getGroundArrival(i)));
             this.stageOtherArrivalSpinnerModel[i].setValue(Integer.valueOf(this.model.getOtherArrival(i)));
@@ -486,7 +504,7 @@ class Editor extends JInternalFrame implements ActionListener, ChangeListener, D
             e.appendChild(this.document.createTextNode(Integer.toString(this.model.getRepeat())));
             source.appendChild(e);
 
-            for(int xmlString = 0; xmlString < this.model.getStageNum(); ++xmlString) {
+            for (int xmlString = 0; xmlString < this.model.getStageNum(); ++xmlString) {
                 e = this.document.createElement("StageTime" + xmlString);
                 e.appendChild(this.document.createTextNode(Integer.toString(this.model.getStageTime(xmlString))));
                 source.appendChild(e);
@@ -506,26 +524,23 @@ class Editor extends JInternalFrame implements ActionListener, ChangeListener, D
             System.out.println(var12.toString());
         }
 
-        Transformer var13 = null;
+        Transformer transformer = null;
 
         try {
-            var13 = TransformerFactory.newInstance().newTransformer();
-        } catch (TransformerConfigurationException var10) {
-            var10.printStackTrace();
-        } catch (TransformerFactoryConfigurationError var11) {
-            var11.printStackTrace();
+            transformer = TransformerFactory.newInstance().newTransformer();
+        } catch (TransformerConfigurationException | TransformerFactoryConfigurationError ex) {
+            ex.printStackTrace();
         }
 
-        var13.setOutputProperty("indent", "yes");
+        transformer.setOutputProperty("indent", "yes");
         StreamResult var14 = new StreamResult(new StringWriter());
         DOMSource var15 = new DOMSource(this.document);
 
-        try {
-            PrintWriter var17 = new PrintWriter(new BufferedWriter(new FileWriter(this.file)), true);
-            var13.transform(var15, var14);
+        try (PrintWriter printWriter = new PrintWriter(new BufferedWriter(new FileWriter(this.file)), true)) {
+            transformer.transform(var15, var14);
             String var16 = var14.getWriter().toString();
-            var17.println(var16);
-            if(Challenge.logging > 1) {
+            printWriter.println(var16);
+            if (Challenge.logging > 1) {
                 System.out.println(var16);
             }
 
@@ -556,22 +571,22 @@ class Editor extends JInternalFrame implements ActionListener, ChangeListener, D
             loadError = true;
         }
 
-        if(!loadError) {
+        if (!loadError) {
             Element var10 = document.getDocumentElement();
-            if(Challenge.logging > 2) {
+            if (Challenge.logging > 2) {
                 System.out.println("Loading element: " + var10.getNodeName());
             }
 
-            if(Challenge.logging > 2) {
+            if (Challenge.logging > 2) {
                 System.out.println("Child elements: " + var10.getChildNodes().getLength());
             }
 
             NodeList var11 = var10.getChildNodes();
 
-            for(int tagName = var10.getChildNodes().getLength() - 1; tagName >= 0; --tagName) {
-                if(var11.item(tagName).getNodeName() == "#text") {
+            for (int tagName = var10.getChildNodes().getLength() - 1; tagName >= 0; --tagName) {
+                if (var11.item(tagName).getNodeName() == "#text") {
                     var10.removeChild(var11.item(tagName));
-                    if(Challenge.logging > 2) {
+                    if (Challenge.logging > 2) {
                         System.out.println("Child element removed");
                     }
                 }
@@ -580,112 +595,120 @@ class Editor extends JInternalFrame implements ActionListener, ChangeListener, D
             String var12 = null;
             String tagValue = null;
 
-            for(int i = 0; i < var10.getChildNodes().getLength(); ++i) {
+            for (int i = 0; i < var10.getChildNodes().getLength(); ++i) {
                 var12 = var11.item(i).getNodeName();
                 tagValue = var11.item(i).getTextContent();
-                if(Challenge.logging > 2) {
+                if (Challenge.logging > 2) {
                     System.out.println("Processing: " + var12 + " and " + tagValue);
                 }
 
-                if(var12 == "Title") {
+                if (var12 == "Title") {
                     this.model.setTitle(tagValue);
-                    if(Challenge.logging > 2) {
+                    if (Challenge.logging > 2) {
                         System.out.println("Got Title");
                     }
                 }
 
-                if(var12 == "Description") {
+                if (var12 == "Description") {
                     this.model.setDescription(tagValue);
-                    if(Challenge.logging > 2) {
+                    if (Challenge.logging > 2) {
                         System.out.println("Got Description");
                     }
                 }
 
-                if(var12 == "Floors") {
+                if (var12 == "Floors") {
                     this.model.setBuildingFloors(Integer.parseInt(tagValue));
-                    if(Challenge.logging > 2) {
+                    if (Challenge.logging > 2) {
                         System.out.println("Got Floors");
                     }
                 }
 
-                if(var12 == "FloorHeight") {
+                if (var12 == "FloorHeight") {
                     this.model.setBuildingFloorHeight(Integer.parseInt(tagValue));
-                    if(Challenge.logging > 2) {
+                    if (Challenge.logging > 2) {
                         System.out.println("Got Floor Height");
                     }
                 }
 
-                if(var12 == "Elevators") {
+                if (var12 == "Elevators") {
                     this.model.setElevators(Integer.parseInt(tagValue));
-                    if(Challenge.logging > 2) {
+                    if (Challenge.logging > 2) {
                         System.out.println("Got Elevators");
                     }
                 }
 
-                if(var12 == "ElevatorCapacity") {
+                if (var12 == "ElevatorCapacity") {
                     this.model.setElevatorCapacity(Integer.parseInt(tagValue));
-                    if(Challenge.logging > 2) {
+                    if (Challenge.logging > 2) {
                         System.out.println("Got Elevator Capacity");
                     }
                 }
 
-                if(var12 == "ElevatorSpeed") {
+                if (var12 == "ElevatorSpeed") {
                     this.model.setElevatorSpeed(Integer.parseInt(tagValue));
-                    if(Challenge.logging > 2) {
+                    if (Challenge.logging > 2) {
                         System.out.println("Got Elevator Speed");
                     }
                 }
 
-                if(var12 == "ElevatorAccel") {
+                if (var12 == "ElevatorAccel") {
                     this.model.setElevatorAccel(Integer.parseInt(tagValue));
-                    if(Challenge.logging > 2) {
+                    if (Challenge.logging > 2) {
                         System.out.println("Got Elevator Accel");
                     }
                 }
 
-                if(var12 == "Stages") {
+                if (var12 == "Stages") {
                     this.model.setStageNum(Integer.parseInt(tagValue));
-                    if(Challenge.logging > 2) {
+                    if (Challenge.logging > 2) {
                         System.out.println("Got Stages");
                     }
                 }
 
-                if(var12 == "Repeats") {
+                if (var12 == "Repeats") {
                     this.model.setRepeat(Integer.parseInt(tagValue));
-                    if(this.model.getRepeat() == 0) {
+                    if (this.model.getRepeat() == 0) {
                         this.model.setRepeat(1);
                     }
 
-                    if(Challenge.logging > 2) {
+                    if (Challenge.logging > 2) {
                         System.out.println("Got Repeats");
                     }
                 }
 
-                if(var12.startsWith("StageTime")) {
-                    this.model.setStageTime(Integer.parseInt(var12.substring("StageTime".length())), Integer.parseInt(tagValue));
-                    if(Challenge.logging > 2) {
-                        System.out.println("Got stage# " + Integer.parseInt(var12.substring("StageTime".length())) + " = " + Integer.parseInt(tagValue));
+                if (var12.startsWith("StageTime")) {
+                    this.model.setStageTime(Integer.parseInt(var12.substring("StageTime".length())),
+                            Integer.parseInt(tagValue));
+                    if (Challenge.logging > 2) {
+                        System.out.println("Got stage# " + Integer.parseInt(var12.substring("StageTime".length()))
+                                + " = " + Integer.parseInt(tagValue));
                     }
                 }
 
-                if(var12.startsWith("GroundArrival")) {
-                    this.model.setGroundArrival(Integer.parseInt(var12.substring("GroundArrival".length())), Integer.parseInt(tagValue));
-                    if(Challenge.logging > 2) {
-                        System.out.println("Got stage# " + Integer.parseInt(var12.substring("GroundArrival".length())) + " ground arrival = " + Integer.parseInt(tagValue));
+                if (var12.startsWith("GroundArrival")) {
+                    this.model.setGroundArrival(Integer.parseInt(var12.substring("GroundArrival".length())),
+                            Integer.parseInt(tagValue));
+                    if (Challenge.logging > 2) {
+                        System.out.println("Got stage# " + Integer.parseInt(var12.substring("GroundArrival".length()))
+                                + " ground arrival = " + Integer.parseInt(tagValue));
                     }
                 }
 
-                if(var12.startsWith("OtherArrival")) {
-                    this.model.setOtherArrival(Integer.parseInt(var12.substring("OtherArrival".length())), Integer.parseInt(tagValue));
-                    if(Challenge.logging > 2) {
-                        System.out.println("Got stage# " + Integer.parseInt(var12.substring("OtherArrival".length())) + " other arrival= " + Integer.parseInt(tagValue));
+                if (var12.startsWith("OtherArrival")) {
+                    this.model.setOtherArrival(Integer.parseInt(var12.substring("OtherArrival".length())),
+                            Integer.parseInt(tagValue));
+                    if (Challenge.logging > 2) {
+                        System.out.println("Got stage# " + Integer.parseInt(var12.substring("OtherArrival".length()))
+                                + " other arrival= " + Integer.parseInt(tagValue));
                     }
                 }
 
-                if(var12.startsWith("OtherExit")) {
-                    this.model.setOtherExit(Integer.parseInt(var12.substring("OtherExit".length())), Integer.parseInt(tagValue));
-                    if(Challenge.logging > 2) {
-                        System.out.println("Got stage# " + Integer.parseInt(var12.substring("OtherExit".length())) + " other exit = " + Integer.parseInt(tagValue));
+                if (var12.startsWith("OtherExit")) {
+                    this.model.setOtherExit(Integer.parseInt(var12.substring("OtherExit".length())),
+                            Integer.parseInt(tagValue));
+                    if (Challenge.logging > 2) {
+                        System.out.println("Got stage# " + Integer.parseInt(var12.substring("OtherExit".length()))
+                                + " other exit = " + Integer.parseInt(tagValue));
                     }
                 }
             }
@@ -697,46 +720,48 @@ class Editor extends JInternalFrame implements ActionListener, ChangeListener, D
     }
 
     boolean saveModel(boolean saveAs) {
-        boolean n = false;
         boolean bail = false;
         String name = null;
         int n1;
-        if(this.isDirty) {
-            n1 = JOptionPane.showConfirmDialog(this, "Would you like to apply changes to scenario \'" + this.getTitle() + "\' before saving?", "Apply Changes?", 1);
-            if(Challenge.logging > 2) {
+        if (this.isDirty) {
+            n1 = JOptionPane.showConfirmDialog(this,
+                    "Would you like to apply changes to scenario \'" + this.getTitle() + "\' before saving?",
+                    "Apply Changes?", 1);
+            if (Challenge.logging > 2) {
                 System.out.println("Dialog option selected: " + n1);
             }
 
-            if(n1 == 0) {
+            if (n1 == 0) {
                 this.applyChanges();
             }
 
-            if(n1 == 1) {
+            if (n1 == 1) {
                 this.restore();
             }
 
-            if(n1 == 2) {
+            if (n1 == 2) {
                 bail = true;
             }
         }
 
-        if(!bail) {
-            if(this.file == null | saveAs) {
+        if (!bail) {
+            if (this.file == null | saveAs) {
                 JFileChooser fc = new JFileChooser(this.file);
                 fc.addChoosableFileFilter(this.fileFilter);
                 fc.setFileFilter(this.fileFilter);
                 fc.setDialogTitle("Save the Scenario \'" + this.getTitle() + "\'?");
                 fc.setMultiSelectionEnabled(false);
                 fc.setFileSelectionMode(0);
-                if(fc.showSaveDialog(this) == 0) {
-                    if(fc.getSelectedFile().exists()) {
-                        n1 = JOptionPane.showConfirmDialog(this, "Do you want to overwrite the existing file?", "Overwrite File?", 0);
-                        if(n1 == 1) {
+                if (fc.showSaveDialog(this) == 0) {
+                    if (fc.getSelectedFile().exists()) {
+                        n1 = JOptionPane.showConfirmDialog(this, "Do you want to overwrite the existing file?",
+                                "Overwrite File?", 0);
+                        if (n1 == 1) {
                             bail = true;
                         }
                     }
 
-                    if(!bail) {
+                    if (!bail) {
                         this.file = fc.getSelectedFile();
                     }
                 } else {
@@ -744,14 +769,14 @@ class Editor extends JInternalFrame implements ActionListener, ChangeListener, D
                 }
             }
 
-            if(!bail) {
+            if (!bail) {
                 name = this.file.getPath();
-                if(!this.file.getName().contains(".")) {
+                if (!this.file.getName().contains(".")) {
                     name = name.concat(".xml");
                 }
 
                 bail = !this.serialAndSave(name);
-                if(bail) {
+                if (bail) {
                     JOptionPane.showMessageDialog(this, "Could not save the file.", "File System Error", 0);
                 } else {
                     this.setTitle(this.file.getName());
@@ -777,15 +802,15 @@ class Editor extends JInternalFrame implements ActionListener, ChangeListener, D
         fc.setMultiSelectionEnabled(false);
         fc.setFileSelectionMode(0);
         fc.setAcceptAllFileFilterUsed(false);
-        if(fc.showOpenDialog(this) == 0) {
+        if (fc.showOpenDialog(this) == 0) {
             this.file = fc.getSelectedFile();
         } else {
             bail = true;
         }
 
-        if(!bail) {
+        if (!bail) {
             name = this.file.getPath();
-            if(!this.openAndSerialize(name)) {
+            if (!this.openAndSerialize(name)) {
                 JOptionPane.showMessageDialog(this, "Could not open the file.", "File System Error", 0);
                 bail = true;
             } else {
@@ -799,21 +824,22 @@ class Editor extends JInternalFrame implements ActionListener, ChangeListener, D
 
     boolean applyChangesSim() {
         boolean bail = false;
-        if(this.isDirty) {
-            int n = JOptionPane.showConfirmDialog(this, "Would you like to apply changes to scenario \'" + this.getTitle() + "\' before running the scenario?", "Apply Changes?", 1);
-            if(Challenge.logging > 2) {
+        if (this.isDirty) {
+            int n = JOptionPane.showConfirmDialog(this, "Would you like to apply changes to scenario \'"
+                    + this.getTitle() + "\' before running the scenario?", "Apply Changes?", 1);
+            if (Challenge.logging > 2) {
                 System.out.println("Dialog option selected: " + n);
             }
 
-            if(n == 0) {
+            if (n == 0) {
                 this.applyChanges();
             }
 
-            if(n == 1) {
+            if (n == 1) {
                 this.restore();
             }
 
-            if(n == 2) {
+            if (n == 2) {
                 bail = true;
             }
         }
@@ -822,62 +848,66 @@ class Editor extends JInternalFrame implements ActionListener, ChangeListener, D
     }
 
     boolean closeModel() {
-        boolean n = false;
         boolean bail = false;
         boolean closeNoSave = false;
         String name = null;
         int n1;
-        if(this.isDirty | !this.isSaved) {
-            n1 = JOptionPane.showConfirmDialog(this, "Would you like to save changes to scenario \'" + this.getTitle() + "\' before closing?", "Save Scenario?", 1);
-            if(n1 == 0) {
+        if (this.isDirty | !this.isSaved) {
+            n1 = JOptionPane.showConfirmDialog(this,
+                    "Would you like to save changes to scenario \'" + this.getTitle() + "\' before closing?",
+                    "Save Scenario?", 1);
+            if (n1 == 0) {
                 bail = false;
-            } else if(n1 == 1) {
+            } else if (n1 == 1) {
                 closeNoSave = true;
-            } else if(n1 == 2) {
+            } else if (n1 == 2) {
                 bail = true;
             } else {
                 bail = true;
             }
         }
 
-        if(this.isDirty & !closeNoSave & !bail) {
-            n1 = JOptionPane.showConfirmDialog(this, "Would you like to apply changes to scenario \'" + this.getTitle() + "\' before saving?", "Apply Changes?", 1);
-            if(Challenge.logging > 2) {
+        if (this.isDirty & !closeNoSave & !bail) {
+            n1 = JOptionPane.showConfirmDialog(this,
+                    "Would you like to apply changes to scenario \'" + this.getTitle() + "\' before saving?",
+                    "Apply Changes?", 1);
+            if (Challenge.logging > 2) {
                 System.out.println("Dialog option selected: " + n1);
             }
 
-            if(n1 == 0) {
+            if (n1 == 0) {
                 this.applyChanges();
-            } else if(n1 == 1) {
+            } else if (n1 == 1) {
                 this.restore();
-            } else if(n1 == 2) {
+            } else if (n1 == 2) {
                 bail = true;
             } else {
                 bail = true;
             }
         }
 
-        if(!bail & !closeNoSave) {
-            if(this.file == null) {
+        if (!bail & !closeNoSave) {
+            if (this.file == null) {
                 JFileChooser fc = new JFileChooser(this.file);
                 fc.addChoosableFileFilter(this.fileFilter);
                 fc.setFileFilter(this.fileFilter);
                 fc.setDialogTitle("Save the Scenario \'" + this.getTitle() + "\'?");
                 fc.setMultiSelectionEnabled(false);
                 fc.setFileSelectionMode(0);
-                if(fc.showSaveDialog(this) == 0) {
-                    if(fc.getSelectedFile().exists()) {
-                        n1 = JOptionPane.showConfirmDialog(this, "Do you want to overwrite the existing file?", "Overwrite File?", 0);
-                        if(n1 == 0) {
+                if (fc.showSaveDialog(this) == 0) {
+                    if (fc.getSelectedFile().exists()) {
+                        n1 = JOptionPane.showConfirmDialog(this, "Do you want to overwrite the existing file?",
+                                "Overwrite File?", 0);
+                        if (n1 == 0) {
                             bail = false;
-                        } else if(n1 == 1) {
+                        } else if (n1 == 1) {
                             bail = true;
                         } else {
                             bail = true;
                         }
                     }
 
-                    if(!bail) {
+                    if (!bail) {
                         this.file = fc.getSelectedFile();
                     }
                 } else {
@@ -885,14 +915,14 @@ class Editor extends JInternalFrame implements ActionListener, ChangeListener, D
                 }
             }
 
-            if(!bail & !closeNoSave) {
+            if (!bail & !closeNoSave) {
                 name = this.file.getPath();
-                if(!this.file.getName().contains(".")) {
+                if (!this.file.getName().contains(".")) {
                     name = name.concat(".xml");
                 }
 
                 bail = !this.serialAndSave(name);
-                if(bail) {
+                if (bail) {
                     JOptionPane.showMessageDialog(this, "Could not save the file.", "File System Error", 0);
                 } else {
                     this.setTitle(this.file.getName());
@@ -913,7 +943,7 @@ class Editor extends JInternalFrame implements ActionListener, ChangeListener, D
     }
 
     public void internalFrameClosed(InternalFrameEvent arg0) {
-        if(--editorActive == 0) {
+        if (--editorActive == 0) {
             this.console.setMenuEditorActive(false);
         }
 
@@ -922,7 +952,7 @@ class Editor extends JInternalFrame implements ActionListener, ChangeListener, D
 
     public void internalFrameClosing(InternalFrameEvent arg0) {
         boolean bail = !this.closeModel();
-        if(!bail) {
+        if (!bail) {
             this.dispose();
         }
 
@@ -938,7 +968,7 @@ class Editor extends JInternalFrame implements ActionListener, ChangeListener, D
     }
 
     public void internalFrameOpened(InternalFrameEvent arg0) {
-        if(++editorActive == 1) {
+        if (++editorActive == 1) {
             this.console.setMenuEditorActive(true);
         }
 

@@ -72,7 +72,6 @@ public class Interface implements IElevators {
 
     @Override
     public int getElevatorPosition(int elevatorNumber) {
-        boolean position = false;
         double dPosition = 0.0D;
         if(elevatorNumber < 0 | elevatorNumber >= this.model.building.elevators) {
             if(Challenge.logging >= 1) {
