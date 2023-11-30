@@ -227,7 +227,7 @@ class Console implements ActionListener, ItemListener, WindowListener {
         if (!urls.isEmpty()) {
             builder.addUrls(urls);
             ClassLoader cl = new URLClassLoader(urls.toArray(new URL[urls.size()]), parent);
-            builder.addClassLoader(cl);
+            builder.addClassLoaders(cl);
         }
     }
 
